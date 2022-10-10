@@ -7,7 +7,7 @@ from tracemalloc import start
 scriptDir = os.getcwd()
 whPath = os.path.expanduser("~/working-hours")
 
-currTime = int(time.time())-(3*24*60*60)
+currTime = int(time.time())
 currDate = datetime.date.fromtimestamp(currTime)
 currWeekday = int(time.strftime("%w", time.gmtime(currTime)))
 
