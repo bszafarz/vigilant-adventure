@@ -1,19 +1,44 @@
 # work time tracker
 
-Simple tool to save start and end timestamp, then based on that values calculate the weekly overhours status.
+This simple tool is used to track working hours and keep the weekly overhours in control.
+
+## how it works?
+The logic of the scipt is following:
+- check if the directory `working-hours` exists under your home folder, if not create if with default `755` permissions
+- Within the directory it expects the files named in the `YYYY-MM-DD` format ex. `2022-10-10` and contains two timestamps (for start and end time)
+- determine number of iteration for the `for` loop using number value of a current weekday
+- calculate overhours for current day (if possible - two value in file are needed) and if possible repeat this step for other files from the current week
+- present results
+
+Assumption: as the app is desinged to run linux OS I've used the user's home directory (`~`) as reference point for used paths within the code.
 
 # usage
 
-using bash_aliases file the two functions associated with proper aliases are used to save timestamps and generate raport
-`sd` as acronim of `start day` is used to generate start timestamp (in seconds since epoch) stored in `~/wh/<date>.log` (`wh` is an acronim of `working hours`)
-`ed` is an acronim of `end day` and is used to generate the end timestamp. Beside that it triggers the python script which compare the timestamps and generate raport.
-
-## structure of a data files
-The app checks if the `~/working-hours` directory exists and if not, creates it with the `755` permissions.
-Within the directory it expects the files named in the `YYYY-MM-DD` format ex. `2022-10-10`
-
-The file should contains two lines - first with the start timestamp (followed by the new line character) and the second one with end timestamp ex.
-```text
-1665385121
-1665414065
+To invoke the script simply call
+```shell
+python3 main.py
 ```
+It will get current date and generate report for current week based on files located in `~/working-hours/` directory.
+
+## my implementation
+
+To keep track of the current overhours status I've created a two bash functions and aliases (using `~/.bash_aliases` file)
+The function `startDay` and `endDay` have one difference - `startDay` create a file if it doesn't exist or truncate it first if file was not empty. The `endDay` only append second timestamp to proper file.
+
+```shell
+startDay(){
+    date +%s > ~/working-hours/$(date +'%Y-%m-%d')
+    python3 ~/scripts/overhours.py
+}
+alias sd="startDay"
+
+endDay(){
+    date +%s >> ~/working-hours/$(date +'%Y-%m-%d')
+    python3 ~/scripts/overhours.py
+}
+alias ed="endDay"
+```
+
+### additional improvements
+
+To keep files tidy the logrotate entry will be created - as TODO task.
